@@ -12,7 +12,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: ['localhost:9092'],  // Dirección del broker Kafka
+        brokers: ['localhost:9092'],  // Cambiar localhost a kafka
       },
       consumer: {
         groupId: 'consumer-group',  // Asegúrate de que sea único por servicio
