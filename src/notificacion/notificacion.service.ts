@@ -1,19 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateNotificacionDto } from './dto/create-notificacion.dto';
 import { UpdateNotificacionDto } from './dto/update-notificacion.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Notificacion } from './entities/notificacion.entity';
+import { Repository } from 'typeorm';
+import { NotificacionGateway } from './notificacion.gateway';
 
 @Injectable()
 export class NotificacionService {
+
+  constructor(
+    @InjectRepository(Notificacion)
+    private notificacionRepository: Repository<Notificacion>,
+
+    @Inject()
+    private notificacionGateway: NotificacionGateway,
+
+  ) {}
+
   async create(createNotificacionDto: CreateNotificacionDto) {
-    return await 'This action adds a new notificacion';
+    const nuevaNotificacion = this.notificacionRepository.create({
+      fechaHora: new Date(),  // Asignar la fecha actual
+      estado: true,  // Estado inicial
+      persona: createNotificacionDto.persona,  // Asignar el objeto persona
+      mensaje: "Datos desde el backend 1",  // Asignar el mensaje
+    });
+
+    // Guardar la notificación en la base de datos
+    const notificacionGuardada  = await this.notificacionRepository.save(nuevaNotificacion);
+    this.notificacionGateway.enviarNotificacion(notificacionGuardada);
+    // Retornar la notificación guardada
+    return notificacionGuardada ;
   }
 
   async findAll() {
-    return await `This action return awaits all notificacion`;
+    const notificaciones = await this.notificacionRepository.find({
+      order: {
+        id: 'DESC', // Cambia a 'DESC' si necesitas el más reciente primero
+      },
+    });
+    return notificaciones;
   }
 
   async findOne(id: number) {
-    return await `This action return awaits a #${id} notificacion`;
+    const notificacion = await this.notificacionRepository.findOneBy({id});
+    return notificacion;
   }
 
   async update(id: number, updateNotificacionDto: UpdateNotificacionDto) {
@@ -23,4 +54,19 @@ export class NotificacionService {
   async remove(id: number) {
     return await `This action removes a #${id} notificacion`;
   }
+
+  // async modelar(data: any) {
+  //   const createNotificacionDto: CreateNotificacionDto = new CreateNotificacionDto();
+  //   createNotificacionDto.fechaHora = new Date();
+  //   createNotificacionDto.mensaje = data.mensaje;
+  //   createNotificacionDto.estado = true;
+  //   createNotificacionDto.persona = data;
+  //   console.log('Modelando:', createNotificacionDto);
+  //   return await `Modelando: ${data}`;
+  // }
+
+  // async MesajeRecibido(data: any) {
+  //   console.log('Mensaje recibido:', data);
+  //   return await `Mensaje recibido: ${data}`;
+  // }
 }

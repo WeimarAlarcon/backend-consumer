@@ -13,4 +13,7 @@ export class Notificacion {
 
     @Column()
     estado: boolean;
+
+    @Column({ type: 'jsonb', nullable: true })  // Almacena el objeto JSON
+    persona: any;
 }
