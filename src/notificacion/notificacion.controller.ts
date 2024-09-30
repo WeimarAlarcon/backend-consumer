@@ -2,11 +2,16 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { NotificacionService } from './notificacion.service';
 import { CreateNotificacionDto } from './dto/create-notificacion.dto';
 import { UpdateNotificacionDto } from './dto/update-notificacion.dto';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { MessageBody, SubscribeMessage } from '@nestjs/websockets';
+import { NotificacionGateway } from './notificacion.gateway';
 
 @Controller('notificaciones')
 export class NotificacionController {
-  constructor(private readonly notificacionService: NotificacionService) {}
+  constructor(
+    private readonly notificacionService: NotificacionService,
+    private readonly notificacionGateway: NotificacionGateway,
+  ) {}
 
   @Post()
   async create(@Body() createNotificacionDto: CreateNotificacionDto) {
@@ -33,11 +38,17 @@ export class NotificacionController {
     return await this.notificacionService.remove(+id);
   }
 
-  @MessagePattern('persona.enviada')
+  // @MessagePattern('persona.enviada')
+  @EventPattern('persona.enviada')
   async registrar(@Payload() data: any) {
     const createNotificacionDto = new CreateNotificacionDto();
     createNotificacionDto.persona = data; 
     return await this.notificacionService.create(createNotificacionDto);
+  }
+
+  @Patch('update/:id')
+  async estadoNotificacion(@Param('id') id: string) {
+    return await this.notificacionService.estadoNotificacion(+id);
   }
 
   // @MessagePattern('persona.enviada')

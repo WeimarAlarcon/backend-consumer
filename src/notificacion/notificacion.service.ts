@@ -23,7 +23,8 @@ export class NotificacionService {
       fechaHora: new Date(),  // Asignar la fecha actual
       estado: true,  // Estado inicial
       persona: createNotificacionDto.persona,  // Asignar el objeto persona
-      mensaje: "Datos desde el backend 1",  // Asignar el mensaje
+      mensaje: `Nueva persona ci:${createNotificacionDto.persona.carnetIdentidad} Nombre: ${createNotificacionDto.persona.nombre}
+        ${createNotificacionDto.persona.apellidoPaterno} ${createNotificacionDto.persona.apellidoMaterno}`,  // Asignar el mensaje
     });
 
     // Guardar la notificación en la base de datos
@@ -55,6 +56,26 @@ export class NotificacionService {
     return await `This action removes a #${id} notificacion`;
   }
 
+  async estadoNotificacion(id: number) {
+    const notificacion = await this.notificacionRepository.findOneBy({ id, estado: false });
+    if (!notificacion) {
+      throw new Error('Notificación no encontrada o ya ha sido leída');
+    }
+    notificacion.estado = true;
+    await this.notificacionRepository.save(notificacion);
+    return notificacion;
+  }
+
+
+  // async estadoNotificacion(id: number) {
+  //   const notificacion = await this.notificacionRepository.findOneBy({ id, estado: false });
+  //   if (!notificacion) {
+  //     throw new Error('Notificación no encontrada o ya ha sido leída');
+  //   }
+  //   notificacion.estado = true;
+  //   await this.notificacionRepository.save(notificacion);
+  //   return notificacion;
+  // }
   // async modelar(data: any) {
   //   const createNotificacionDto: CreateNotificacionDto = new CreateNotificacionDto();
   //   createNotificacionDto.fechaHora = new Date();
